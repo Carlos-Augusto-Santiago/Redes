@@ -1,1 +1,6 @@
+#ignorar los class cuando se compila un java
 *.class
+#ignorar los documentos de word
+*.docx
+#ignorar los rar
+*.rar
