@@ -4,3 +4,7 @@
 *.docx
 #ignorar los rar
 *.rar
+/Primer-parcial/Practica/Practica/target/
+/Primer-parcial/Practica/Carrito_Compras/target/
+/Primer-parcial/Practica/Practica_carrito/nbproject/private/
+/Primer-parcial/Practica/Practica_carrito/build/
