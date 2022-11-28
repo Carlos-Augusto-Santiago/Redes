@@ -1,10 +1,7 @@
 package Servidor;
 
 import java.net.*;
-import com.sun.org.apache.xerces.internal.impl.dv.util.Base64;
-import javax.imageio.ImageIO;
 import java.io.*;
-import java.awt.image.BufferedImage;
 
 public class Servidor {
     public static void main(String[] args) {
@@ -53,6 +50,11 @@ public class Servidor {
         } catch (Exception e) {
             e.printStackTrace();
         } // catch
+    }
+
+    public void getImage(String path) throws FileNotFoundException {
+        FileInputStream myStream = new FileInputStream(path);
+        byte[] imageInBytes = IOUtils.toByteArray(myStream);
     }
 
 }
