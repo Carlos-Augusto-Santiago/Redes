@@ -25,19 +25,17 @@ public class Servidor {
                 addProduct("Playera magenta", 200, "Playera de tela 100% algodon", 10, img);
                 addProduct("Playera rosa", 200, "Playera de tela 100% algodon", 10, img);
 
-                // Serializar y enviar el catalogo
-                sendCatalogue(dos);
-
-                // Recibir el producto que el usuario quiere comprar
-                int numProduct = dis.readInt();
-                // Comprobacion de exitencias
-                int exist = catalogo.get(numProduct).getStock();
-                if(exist >= 0){
-                    System.out.println("Producto en existencia");
-                    System.out.println("Reduciendo el stock de exitencias");
-                    catalogo.get(numProduct).setStock(exist - 1);
+                int aux = 3;
+                while(aux > 0){
+                    // Serializar y enviar el catalogo
                     sendCatalogue(dos);
+    
+                    // Recibir que producto pidio el cliente
+                    updateCatalogue(dis);
+                    aux--;
                 }
+
+                dos.close();
 
             }
         } catch (Exception e) {
@@ -102,11 +100,25 @@ public class Servidor {
                 System.out.print("Enviado: " + porcentaje + "%\r");
             }
             System.out.print("\nArchivo enviado\n");
+            System.out.println();
             dis.close();
-            dos.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
+    public static void updateCatalogue(DataInputStream dis) throws IOException {
+        // Recibir el producto que el usuario quiere comprar
+        int numProduct = dis.readInt() - 1;
+        // Comprobacion de exitencias
+        int exist = catalogo.get(numProduct).getStock();
+        if(exist >= 0){
+            System.out.println("Producto en existencia");
+            System.out.println("Se tienen: " + exist);
+            System.out.println("Reduciendo el stock de exitencias");
+            catalogo.get(numProduct).setStock(exist - 1);
+            int newStock = catalogo.get(numProduct).getStock();
+            System.out.println("Quedan " + newStock + " productos");
+        }
+    }
 }

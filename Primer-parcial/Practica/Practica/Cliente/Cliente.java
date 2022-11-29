@@ -1,8 +1,15 @@
 
 import java.net.*;
+import java.util.ArrayList;
 import java.io.*;
 
 public class Cliente {
+
+    static int numProducts;
+    static String nombre;
+    static long tam;
+    static ArrayList<Producto> carrito = new ArrayList<Producto>();
+
     public static void main(String[] args) {
         try {
             // Conectando con el servidor
@@ -15,23 +22,24 @@ public class Cliente {
             DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
             DataInputStream dis = new DataInputStream(cl.getInputStream());
 
-            // Recibir el archivo serializado
-            // recibir la cantidad de productos
-            int numProducts = dis.readInt();
-            // se recibe el nombre del archivo
-            String nombre = dis.readUTF();
-            System.out.println("Recibimos el archivo:" + nombre);
-            // se recibe el tamaño del archivo
-            long tam = dis.readLong();
+            int aux = 3;
+            
+            while (aux > 0) {
+                // Recibir el archivo serializado
+                // recibir la cantidad de productos
+                numProducts = dis.readInt();
+                // se recibe el nombre del archivo
+                nombre = dis.readUTF();
+                System.out.println("Recibimos el archivo:" + nombre);
+                // se recibe el tamaño del archivo
+                tam = dis.readLong();
+                // Recibir el archivo serializado
+                recieveFile(nombre, tam, dis);
 
-            // Recibir el archivo serializado
-            recieveFile(nombre, tam, dis);
-
-            // Deserializando el archivo
-            deserialize(nombre, numProducts);
-
-            // Enviando el producto que se esta comprando
-            buying(br, dos);
+                // Enviando el producto que se esta comprando
+                buying(br, dos, dis);
+                aux--;
+            }
 
             dis.close();
             cl.close();
@@ -57,16 +65,7 @@ public class Cliente {
                 System.out.print("Recibido: " + porcentaje + "%\r");
             }
             System.out.print("\nArchivo recibido.\n");
-            dos.close();
 
-        } catch (Exception e) {
-            // TODO: handle exception
-        }
-    }
-
-    // Deserializando archivo
-    public static void deserialize(String nombre, int numProducts) {
-        try {
             // Deserializando el archivo
             FileInputStream file = new FileInputStream(nombre);
             ObjectInputStream ois = new ObjectInputStream(file);
@@ -74,28 +73,29 @@ public class Cliente {
             System.out.println("El catalogo es: ");
             for (int i = 0; i < numProducts; i++) {
                 Producto aux = (Producto) ois.readObject();
-                System.out.println("Num Producto: " + i++);
+                System.out.println("Num Producto: " + (i + 1));
                 System.out.println("Nombre: " + aux.name);
                 System.out.println("Precio: $" + aux.price);
                 System.out.println("Descripcion: " + aux.desc);
                 System.out.println("Stock: " + aux.stock);
                 System.out.println();
             }
+            dos.close();
             ois.close();
+
         } catch (Exception e) {
             // TODO: handle exception
         }
     }
 
     // Comprando un producto
-    public static void buying(BufferedReader br, DataOutputStream dos) {
+    public static void buying(BufferedReader br, DataOutputStream dos, DataInputStream dis) {
         try {
             System.out.println("¿Que producto desea comprar?");
-            System.out.println("Ingresa el numero del producto");
+            System.out.print("Ingresa el numero del producto: ");
             int num = Integer.parseInt(br.readLine());
             System.out.println("Se estan comprobando existencias de su producto, por favor espere");
             dos.writeInt(num);
-            
         } catch (Exception e) {
             // TODO: handle exception
         }
