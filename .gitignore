@@ -4,6 +4,8 @@
 *.docx
 #ignorar los rar
 *.rar
+#ignorar los archivos creados en mac
+*.DS_Store
 /Primer-parcial/Practica/Practica/target/
 /Primer-parcial/Practica/Carrito_Compras/target/
 /Primer-parcial/Practica/Practica_carrito/nbproject/private/

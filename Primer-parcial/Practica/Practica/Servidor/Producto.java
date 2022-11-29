@@ -9,6 +9,7 @@ public class Producto {
 
     byte[] img = new byte[1024 * 8];
 
+    // Clase constructora
     public Producto(String name, int price, String desc, int stock, byte[] img) {
         this.name = name;
         this.price = price;

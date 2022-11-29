@@ -1,6 +1,5 @@
 package Cliente;
 
-import javax.swing.JFileChooser;
 import java.net.*;
 import java.io.*;
 
@@ -9,53 +8,45 @@ public class Cliente {
         try {
             // Conectando con el servidor
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-            System.out.printf("Escriba la direccion del servidor:");
+            System.out.printf("Escriba la direccion del servidor: ");
             String host = br.readLine();
-            System.out.printf("\n\nEscriba el puerto:");
+            System.out.printf("\nEscriba el puerto: ");
             int pto = Integer.parseInt(br.readLine());
             Socket cl = new Socket(host, pto);
 
-            JFileChooser jf = new JFileChooser();
-            jf.setMultiSelectionEnabled(true);
-            int r = jf.showOpenDialog(null);
-            if (r == JFileChooser.APPROVE_OPTION) {
-                File[] f = jf.getSelectedFiles(); // Manejador
-                // cuantos archivos se van a enviar
-                int numFiles = f.length;
-                DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
-                // enviamos el numFiles al servidor
-                dos.writeInt(numFiles);
-                // ciclo para obtener los datos de cada archivo
-                for (int i = 0; i < numFiles; i++) {
-                    String archivo = f[i].getAbsolutePath(); // Dirección
-                    String nombre = f[i].getName(); // Nombre
-                    long tam = f[i].length(); // Tamaño
-                    DataInputStream dis = new DataInputStream(new FileInputStream(archivo));
-                    // se envia el nombre del archivo
-                    dos.writeUTF(nombre);
-                    dos.flush();
-                    // se envia el tamaño del archivo
-                    dos.writeLong(tam);
-                    dos.flush();
-                    // se lee el archivo en paquetes
-                    byte[] b = new byte[1024];
-                    long enviados = 0;
-                    int porcentaje, n;
-                    while (enviados < tam) {
-                        n = dis.read(b);
-                        // se escribe el contenido del archivo
-                        dos.write(b, 0, n);
-                        dos.flush();
-                        enviados = enviados + n;
-                        porcentaje = (int) (enviados * 100 / tam);
-                        System.out.print("Enviado: " + porcentaje + "%\r");
-                    } // While
-                    System.out.print("\n\nArchivo enviado\n");
-                    dis.close();
-                }
-                cl.close();
-                dos.close();
-            } // if
+            // Recibir el archivo serializado
+            // se recibe el nombre del archivo
+            DataInputStream dis = new DataInputStream(cl.getInputStream());
+            String nombre = dis.readUTF();
+            System.out.println("Recibimos el archivo:" + nombre);
+            // se recibe el tamaño del archivo
+            long tam = dis.readLong();
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
+            long recibidos = 0;
+            // paquete para el contenido del archivo
+            byte[] b = new byte[6 * 1024];
+            int n, porcentaje;
+            while (recibidos < tam) {
+                n = dis.read(b);
+                // se recibe el contenido del archivo
+                dos.write(b, 0, n);
+                dos.flush();
+                recibidos = recibidos + n;
+                porcentaje = (int) (recibidos * 100 / tam);
+                System.out.print("Recibido: " + porcentaje + "%\r");
+            } // While
+            System.out.print("\nArchivo recibido.\n");
+
+            // Deserializando el archivo
+            FileInputStream file = new FileInputStream(nombre);
+            ObjectInputStream ois = new ObjectInputStream(file);
+            System.out.println("Deserializando txt...");
+            System.out.println("Puedes consultar el catalogo en el archivo txt, al igual que las imagenes que se te mandaron");
+
+            dos.close();
+            dis.close();
+            ois.close();
+            cl.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
