@@ -27,6 +27,8 @@ public class Cliente {
 
             int opc;
             String ok = "";
+            filesRecibidos("Playera_1.jpeg", dis);
+            filesRecibidos("Playera_2.jpeg", dis);
             do {
                 // Recibir el archivo serializado
                 // recibir la cantidad de productos
@@ -174,5 +176,19 @@ public class Cliente {
             System.out.println("Stock: " + carrito.get(i).stock);
             System.out.println();
         }
+    }
+
+    public static void filesRecibidos(String fileName, DataInputStream dis) throws Exception
+    {
+        int bytes = 0;
+        FileOutputStream fo =new FileOutputStream(fileName);
+        long size = dis.readLong();
+        byte[] buffer = new byte[4*1024];
+
+        while (size > 0 && (bytes = dis.read(buffer, 0, (int)Math.min(buffer.length, size))) != -1) {
+            fo.write(buffer,0,bytes);
+            size -= bytes;
+        }
+        fo.close();
     }
 }
