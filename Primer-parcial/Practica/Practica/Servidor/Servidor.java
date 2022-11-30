@@ -25,14 +25,14 @@ public class Servidor {
                 addProduct("Playera magenta", 200, "Playera de tela 100% algodon", 10, img);
                 addProduct("Playera rosa", 200, "Playera de tela 100% algodon", 10, img);
 
-                int aux = 3;
-                while(aux > 0){
-                    // Serializar y enviar el catalogo
+                op = dis.readUTF();
+                while (True) {
+                    // // Serializar y enviar el catalogo
                     sendCatalogue(dos);
-    
-                    // Recibir que producto pidio el cliente
+
+                    // // Recibir que producto pidio el cliente
                     updateCatalogue(dis);
-                    aux--;
+
                 }
 
                 dos.close();
@@ -112,7 +112,7 @@ public class Servidor {
         int numProduct = dis.readInt() - 1;
         // Comprobacion de exitencias
         int exist = catalogo.get(numProduct).getStock();
-        if(exist >= 0){
+        if (exist >= 0) {
             System.out.println("Producto en existencia");
             System.out.println("Se tienen: " + exist);
             System.out.println("Reduciendo el stock de exitencias");

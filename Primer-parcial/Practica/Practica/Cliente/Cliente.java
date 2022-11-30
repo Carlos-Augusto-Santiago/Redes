@@ -2,17 +2,20 @@
 import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
+import java.util.Scanner;
 
 public class Cliente {
 
     static int numProducts;
     static String nombre;
+    static String op;
     static long tam;
     static ArrayList<Producto> carrito = new ArrayList<Producto>();
 
     public static void main(String[] args) {
         try {
             // Conectando con el servidor
+            // Scanner scanner = new Scanner(System.in);
             BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
             System.out.printf("Escriba la direccion del servidor: ");
             String host = br.readLine();
@@ -22,9 +25,9 @@ public class Cliente {
             DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
             DataInputStream dis = new DataInputStream(cl.getInputStream());
 
-            int aux = 3;
-            
-            while (aux > 0) {
+            // int aux = 3;
+
+            do {
                 // Recibir el archivo serializado
                 // recibir la cantidad de productos
                 numProducts = dis.readInt();
@@ -38,8 +41,10 @@ public class Cliente {
 
                 // Enviando el producto que se esta comprando
                 buying(br, dos, dis);
-                aux--;
-            }
+                System.out.printf("¿Quiere continuar comprando? \nTipea no para salir");
+                op = dis.readLine();
+                // aux--;
+            } while (op != "no");
 
             dis.close();
             cl.close();
