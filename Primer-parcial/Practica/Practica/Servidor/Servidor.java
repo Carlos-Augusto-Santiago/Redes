@@ -5,6 +5,7 @@ import java.io.*;
 
 public class Servidor {
     static ArrayList<Producto> catalogo = new ArrayList<Producto>();
+    static String op;
 
     public static void main(String[] args) {
         try {
@@ -25,15 +26,16 @@ public class Servidor {
                 addProduct("Playera magenta", 200, "Playera de tela 100% algodon", 10, img);
                 addProduct("Playera rosa", 200, "Playera de tela 100% algodon", 10, img);
 
-                op = dis.readUTF();
-                while (True) {
-                    // // Serializar y enviar el catalogo
+                do {
+                    // Serializar y enviar el catalogo
                     sendCatalogue(dos);
-
-                    // // Recibir que producto pidio el cliente
+                    // Recibir que producto pidio el cliente
                     updateCatalogue(dis);
+                    op = dis.readUTF();
 
-                }
+                } while (!op.equals("no"));
+
+                System.out.println("El cliente termino de realiar su compra");
 
                 dos.close();
 

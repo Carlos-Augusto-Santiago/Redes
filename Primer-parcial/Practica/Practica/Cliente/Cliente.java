@@ -2,7 +2,6 @@
 import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
-import java.util.Scanner;
 
 public class Cliente {
 
@@ -10,6 +9,7 @@ public class Cliente {
     static String nombre;
     static String op;
     static long tam;
+    static ArrayList<Producto> catalogo = new ArrayList<Producto>();
     static ArrayList<Producto> carrito = new ArrayList<Producto>();
 
     public static void main(String[] args) {
@@ -25,26 +25,63 @@ public class Cliente {
             DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
             DataInputStream dis = new DataInputStream(cl.getInputStream());
 
-            // int aux = 3;
-
             do {
                 // Recibir el archivo serializado
                 // recibir la cantidad de productos
                 numProducts = dis.readInt();
                 // se recibe el nombre del archivo
                 nombre = dis.readUTF();
-                System.out.println("Recibimos el archivo:" + nombre);
                 // se recibe el tamaño del archivo
                 tam = dis.readLong();
                 // Recibir el archivo serializado
                 recieveFile(nombre, tam, dis);
+                // Menu de opciones
+                System.out.println("¿Que deseas realizar?");
+                System.out.println("1. Comprar productos");
+                System.out.println("2. Checar el carrito de compras");
+                System.out.println("3. Eliminar productos del carrito");
+                System.out.println("4. Cancelar todo el carrito");
+                System.out.println("5. Comprar lo que hay en el carrito");
+                System.out.println("6. Salir");
+                int opc = Integer.parseInt(br.readLine());
 
-                // Enviando el producto que se esta comprando
-                buying(br, dos, dis);
-                System.out.printf("¿Quiere continuar comprando? \nTipea no para salir");
-                op = dis.readLine();
+                switch (opc) {
+                    case 1:
+                        // Enviando el producto que se esta comprando
+                        buying(br, dos, dis);
+                        break;
+                    case 2:
+                        // Checando productos del carrito
+                        // Si el carrito esta vacio devolver que no hay productos
+                        if (carrito.size() == 0) {
+                            System.out.println("El carrito esta vacio");
+                        } else {
+                            for (int i = 0; i < carrito.size(); i++) {
+                                System.out.println("Productos del carrito");
+                                System.out.println("Nombre: " + carrito.get(i).name);
+                                System.out.println("Precio: $" + carrito.get(i).price);
+                                System.out.println("Descripcion: " + carrito.get(i).desc);
+                                System.out.println("Stock: " + carrito.get(i).stock);
+                                System.out.println();
+                            }
+                        }
+                        break;
+                    case 3:
+                        // Borrar productos del carrito
+                        if (carrito.size() == 0) {
+                            System.out.println("El carrito esta vacio");
+                        } else {
+                            System.out.println("¿Que produto quieres borrar del carrito");
+                            
+                        }
+                        break;
+                }
+                System.out.printf("¿Quiere continuar comprando? \nTipea no para salir: ");
+                op = br.readLine();
+                // Enviar al servidor la respuesta
+                dos.writeUTF(op);
                 // aux--;
-            } while (op != "no");
+            } while (!op.equals("no"));
 
             dis.close();
             cl.close();
@@ -67,14 +104,13 @@ public class Cliente {
                 dos.flush();
                 recibidos = recibidos + n;
                 porcentaje = (int) (recibidos * 100 / tam);
-                System.out.print("Recibido: " + porcentaje + "%\r");
             }
-            System.out.print("\nArchivo recibido.\n");
+            System.out.print("\nCatalogo\n");
 
             // Deserializando el archivo
             FileInputStream file = new FileInputStream(nombre);
             ObjectInputStream ois = new ObjectInputStream(file);
-            System.out.println("Deserializando txt...");
+            System.out.println();
             System.out.println("El catalogo es: ");
             for (int i = 0; i < numProducts; i++) {
                 Producto aux = (Producto) ois.readObject();
@@ -84,6 +120,7 @@ public class Cliente {
                 System.out.println("Descripcion: " + aux.desc);
                 System.out.println("Stock: " + aux.stock);
                 System.out.println();
+                catalogo.add(aux);
             }
             dos.close();
             ois.close();
@@ -101,6 +138,8 @@ public class Cliente {
             int num = Integer.parseInt(br.readLine());
             System.out.println("Se estan comprobando existencias de su producto, por favor espere");
             dos.writeInt(num);
+            carrito.add(catalogo.get(num - 1));
+            System.out.println("Producto agregado al carrito");
         } catch (Exception e) {
             // TODO: handle exception
         }
