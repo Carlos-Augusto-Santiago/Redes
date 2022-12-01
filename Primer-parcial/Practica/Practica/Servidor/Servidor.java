@@ -46,13 +46,6 @@ public class Servidor {
                     // reestablecer o reducir stock
                     String opc = dis.readUTF();
                     switch (opc) {
-                        case "b":
-                            // Recibir que producto pidio el cliente
-                            reduceStock(dis);
-                            break;
-                        case "r":
-                            restoreCatalogue(dis);
-                            break;
                         case "u":
                             updateCatalogue(dis);
                             break;
@@ -146,35 +139,9 @@ public class Servidor {
         }
     }
 
-    public static void reduceStock(DataInputStream dis) throws IOException {
-        // Recibir el producto que el usuario quiere comprar
-        int numProduct = dis.readInt() - 1;
-        int cantProducts = dis.readInt();
-        // Comprobacion de exitencias
-        int exist = catalogo.get(numProduct).getCant();
-        if (exist >= 0) {
-            System.out.println("Producto " + catalogo.get(numProduct).getName() + " en existencia");
-            System.out.println("Se tienen: " + exist);
-            catalogo.get(numProduct).setCant(exist - cantProducts);
-            int newStock = catalogo.get(numProduct).getCant();
-            System.out.println("Quedan " + newStock + " productos");
-        }
-    }
-
-    public static void restoreCatalogue(DataInputStream dis) throws IOException {
-        // Recibir el producto que el usuario ya no quiso
-        int product = dis.readInt();
-        // Recibir la cantidad de productos que eran
-        int numProducts = dis.readInt();
-        // Reestableciendo el stock
-        int stock = catalogo.get(product).getCant();
-        catalogo.get(product).setCant(stock + numProducts);
-        System.out.println("Se reestablecieron " + catalogo.get(product).getCant() + " los productos del articulo "
-                + catalogo.get(product).getName());
-    }
 
     public static void updateCatalogue(DataInputStream dis) throws IOException {
-        // Recibir el producto que el usuario ya no quiso
+        // Recibir el producto que el usuario compro    
         int product = dis.readInt();
         // Recibir la cantidad de productos a quitar
         int numProducts = dis.readInt();
