@@ -31,6 +31,13 @@ public class Servidor {
                     addProduct(6, "Playera rosa", 200, "Playera de tela 100% algodon", 10);
                 }
 
+                sendFiles(
+                        "/home/spike/Documents/REDES_2/Redes/Primer-parcial/Practica/Practica/Servidor/imgs/awwww.jpeg",
+                        dos);
+                sendFiles(
+                        "/home/spike/Documents/REDES_2/Redes/Primer-parcial/Practica/Practica/Servidor/imgs/makima.jpeg",
+                        dos);
+
                 int op;
                 do {
                     // Serializar y enviar el catalogo
