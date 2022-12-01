@@ -61,7 +61,7 @@ public class Cliente {
                 switch (opc) {
                     case 1:
                         // Enviando el producto que se esta comprando
-                        dos.writeUTF("b");
+                        //dos.writeUTF("b");
                         buying(br, dos);
                         break;
                     case 2:
@@ -123,6 +123,10 @@ public class Cliente {
                             System.out.println("El carrito esta vacio");
                         } else {
                             crearPDF();
+                            for(int i = 0; i < carrito.size(); i++)
+                            {
+                                carrito.remove(i);
+                            }
                         }
                         System.out.println("Press Any Key To Continue...");
                         new java.util.Scanner(System.in).nextLine();
