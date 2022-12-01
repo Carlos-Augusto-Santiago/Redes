@@ -2,6 +2,7 @@
 
 import java.net.*;
 import java.util.ArrayList;
+import java.util.Date;
 import java.io.*;
 
 import com.itextpdf.text.Document;
@@ -204,6 +205,8 @@ public class Cliente {
 
     public static void crearPDF() throws Exception {
 
+        int total = 0;
+        Date fecha = new Date();
         Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
         // OutputStream outdoc = new OutputStream(new File("test.pdf"));
         // Crea la instancia de pdf
@@ -217,9 +220,11 @@ public class Cliente {
             doc.add(new Paragraph("Nombre: " + carrito.get(i).name));
             doc.add(new Paragraph("Precio: $" + carrito.get(i).price));
             doc.add(new Paragraph("Descripcion: " + carrito.get(i).desc));
+            total = carrito.get(i).price + total;
 
         }
-
+        doc.add(new Paragraph("El total de la compra fue de: " + total));
+        doc.add(new Paragraph("Emitido: " + fecha));
         doc.close();
 
     }
