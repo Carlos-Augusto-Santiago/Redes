@@ -177,4 +177,19 @@ public class Servidor {
                 .println(
                         "Se tienen " + catalogo.get(product).getCant() + " del producto " + catalogo.get(product).name);
     }
+
+    public static void sendFiles(String path, DataOutputStream dos) throws Exception {
+        int bytes = 0;
+        File img = new File(path);
+        FileInputStream fs = new FileInputStream(img);
+
+        // Mandando el tamaño del archivo
+        dos.writeLong(img.length());
+        byte[] buffer = new byte[4 * 1024];
+        while ((bytes = fs.read(buffer)) != -1) {
+            dos.write(buffer, 0, bytes);
+            dos.flush();
+        }
+        fs.close();
+    }
 }
