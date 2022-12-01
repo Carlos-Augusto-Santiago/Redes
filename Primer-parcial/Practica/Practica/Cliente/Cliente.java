@@ -299,6 +299,7 @@ public class Cliente {
     public static void crearPDF() throws Exception {
 
         int total = 0;
+        int cantidad = 0;
         Date fecha = new Date();
         Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
         // OutputStream outdoc = new OutputStream(new File("test.pdf"));
@@ -309,14 +310,17 @@ public class Cliente {
         // Crear el ticket de compra
         for (int i = 0; i < carrito.size(); i++) {
             doc.add(new Paragraph("Ticket de Compra"));
-            doc.add(new Paragraph("Num Producto: " + (i + 1)));
-            doc.add(new Paragraph("Nombre: " + carrito.get(i).name));
-            doc.add(new Paragraph("Precio: $" + carrito.get(i).price));
-            doc.add(new Paragraph("Descripcion: " + carrito.get(i).desc));
-            total = carrito.get(i).price + total;
+            doc.add(new Paragraph("Num Producto: " + carrito.get(i).getId()));
+            doc.add(new Paragraph("Nombre: " + carrito.get(i).getName()));
+            doc.add(new Paragraph("Precio: $" + carrito.get(i).getPrice()));
+            doc.add(new Paragraph("Descripcion: " + carrito.get(i).getDesc()));
+            doc.add(new Paragraph("Cantidad: " + carrito.get(i).getCant()));
+            total = carrito.get(i).getPrice() + total;
+            cantidad = carrito.get(i).getCant() + cantidad;
 
         }
         doc.add(new Paragraph("El total de la compra fue de: " + total));
+        doc.add(new Paragraph("El total de productos fue: " + cantidad));
         doc.add(new Paragraph("Emitido: " + fecha));
         doc.close();
 
