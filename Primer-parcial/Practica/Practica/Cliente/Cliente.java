@@ -1,7 +1,12 @@
-
 import java.net.*;
 import java.util.ArrayList;
 import java.io.*;
+
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.Paragraph;
+import com.itextpdf.text.pdf.PdfWriter;
 
 public class Cliente {
 
@@ -24,6 +29,9 @@ public class Cliente {
             Socket cl = new Socket(host, pto);
             DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
             DataInputStream dis = new DataInputStream(cl.getInputStream());
+
+            filesRecibidos("Playera_1.jpeg", dis);
+            filesRecibidos("Playera_2.jpeg", dis);
 
             int opc;
             do {
@@ -113,7 +121,7 @@ public class Cliente {
                         if (carrito.isEmpty()) {
                             System.out.println("El carrito esta vacio");
                         } else {
-                            // Generar el archivo pdf con los articulos del carrito
+                            crearPDF();
                         }
                         System.out.println("Press Any Key To Continue...");
                         new java.util.Scanner(System.in).nextLine();
@@ -272,5 +280,44 @@ public class Cliente {
                 }
             }
         }
+    }
+
+    public static void filesRecibidos(String fileName, DataInputStream dis) throws Exception {
+        int bytes = 0;
+        FileOutputStream fo = new FileOutputStream(fileName);
+        long size = dis.readLong();
+        byte[] buffer = new byte[4 * 1024];
+
+        while (size > 0 && (bytes = dis.read(buffer, 0, (int) Math.min(buffer.length, size))) != -1) {
+            fo.write(buffer, 0, bytes);
+            size -= bytes;
+        }
+        fo.close();
+    }
+
+    public static void crearPDF() throws Exception {
+
+        int total = 0;
+        Date fecha = new Date();
+        Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
+        // OutputStream outdoc = new OutputStream(new File("test.pdf"));
+        // Crea la instancia de pdf
+        PdfWriter.getInstance(doc, new FileOutputStream("test.pdf"));
+        doc.open();
+
+        // Crear el ticket de compra
+        for (int i = 0; i < carrito.size(); i++) {
+            doc.add(new Paragraph("Ticket de Compra"));
+            doc.add(new Paragraph("Num Producto: " + (i + 1)));
+            doc.add(new Paragraph("Nombre: " + carrito.get(i).name));
+            doc.add(new Paragraph("Precio: $" + carrito.get(i).price));
+            doc.add(new Paragraph("Descripcion: " + carrito.get(i).desc));
+            total = carrito.get(i).price + total;
+
+        }
+        doc.add(new Paragraph("El total de la compra fue de: " + total));
+        doc.add(new Paragraph("Emitido: " + fecha));
+        doc.close();
+
     }
 }
