@@ -200,25 +200,40 @@ public class Cliente {
     }
 
     public static void crearPDF() throws Exception {
-        Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
-        // OutputStream outdoc = new OutputStream(new File("test.pdf"));
-        // Crea la instancia de pdf
-        PdfWriter.getInstance(doc, new FileOutputStream("test.pdf"));
-        doc.open();
 
-        Paragraph paragraph = new Paragraph();
-        // Crear el ticket de compra
-        for (int i = 0; i < carrito.size(); i++) {
-            paragraph.add("Ticket de Compra");
-            paragraph.add("Num Producto: " + (i + 1));
-            paragraph.add("Nombre: " + carrito.get(i).name);
-            paragraph.add("Precio: $" + carrito.get(i).price);
-            paragraph.add("Descripcion: " + carrito.get(i).desc);
-            paragraph.add("Stock: " + carrito.get(i).stock);
+        // 1. Create document
+        Document document = new Document(PageSize.A4, 50, 50, 50, 50);
 
-        }
+        // 2. Create PdfWriter
+        PdfWriter.getInstance(document, new FileOutputStream("result.pdf"));
 
-        doc.close();
+        // 3. Open document
+        document.open();
+
+        // 4. Add content
+        document.add(new Paragraph("Create Pdf Document with iText in Java"));
+
+        // 5. Close document
+        document.close();
+        // Document doc = new Document(PageSize.A4, 50, 50, 50, 50);
+        // // OutputStream outdoc = new OutputStream(new File("test.pdf"));
+        // // Crea la instancia de pdf
+        // PdfWriter.getInstance(doc, new FileOutputStream("test.pdf"));
+        // doc.open();
+
+        // Paragraph paragraph = new Paragraph();
+        // // Crear el ticket de compra
+        // for (int i = 0; i < carrito.size(); i++) {
+        // paragraph.add("Ticket de Compra");
+        // paragraph.add("Num Producto: " + (i + 1));
+        // paragraph.add("Nombre: " + carrito.get(i).name);
+        // paragraph.add("Precio: $" + carrito.get(i).price);
+        // paragraph.add("Descripcion: " + carrito.get(i).desc);
+        // paragraph.add("Stock: " + carrito.get(i).stock);
+
+        // }
+
+        // doc.close();
 
     }
 }
