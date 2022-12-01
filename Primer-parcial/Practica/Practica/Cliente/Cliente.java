@@ -118,11 +118,16 @@ public class Cliente {
                         System.out.flush();
                         break;
                     case 5:
-                        dos.writeUTF("nada");
+                        dos.writeUTF("b");
                         if (carrito.isEmpty()) {
                             System.out.println("El carrito esta vacio");
                         } else {
                             crearPDF();
+                            for(int i = 0; i < carrito.size(); i++)
+                            {
+                                carrito.remove(i);
+                            }
+
                         }
                         System.out.println("Press Any Key To Continue...");
                         new java.util.Scanner(System.in).nextLine();
