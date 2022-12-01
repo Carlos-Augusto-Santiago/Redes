@@ -5,37 +5,56 @@ import java.io.*;
 
 public class Servidor {
     static ArrayList<Producto> catalogo = new ArrayList<Producto>();
-    static String op;
+    static int num_products_deserialize = 6;
 
     public static void main(String[] args) {
         try {
             ServerSocket s = new ServerSocket(7000);
             for (;;) {
                 Socket cl = s.accept();
-                System.out.println("Conexión establecida desde" + cl.getInetAddress() + ":" + cl.getPort());
+                System.out.println("Conexion establecida desde" + cl.getInetAddress() + ":" + cl.getPort());
                 DataInputStream dis = new DataInputStream(cl.getInputStream());
                 DataOutputStream dos = new DataOutputStream(cl.getOutputStream());
 
-                byte[] img = new byte[100];
+                // checar si ya existe un archivo de catalogo
+                File ct = new File("Catalogo.txt");
+                if (ct.exists()) {
+                    // deserializar el archivo
+                    deserializeFile(ct.getName());
+                } else {
+                    // Agregando productos al catalogo
+                    addProduct(1, "Playera azul", 200, "Playera de tela 100% algodon", 10);
+                    addProduct(2, "Playera roja", 200, "Playera de tela 100% algodon", 10);
+                    addProduct(3, "Playera verde", 200, "Playera de tela 100% algodon", 10);
+                    addProduct(4, "Playera amarilla", 200, "Playera de tela 100% algodon", 10);
+                    addProduct(5, "Playera magenta", 200, "Playera de tela 100% algodon", 10);
+                    addProduct(6, "Playera rosa", 200, "Playera de tela 100% algodon", 10);
+                }
 
-                // Agregando productos al catalogo
-                addProduct("Playera azul", 200, "Playera de tela 100% algodon", 10, img);
-                addProduct("Playera roja", 200, "Playera de tela 100% algodon", 10, img);
-                addProduct("Playera verde", 200, "Playera de tela 100% algodon", 10, img);
-                addProduct("Playera amarilla", 200, "Playera de tela 100% algodon", 10, img);
-                addProduct("Playera magenta", 200, "Playera de tela 100% algodon", 10, img);
-                addProduct("Playera rosa", 200, "Playera de tela 100% algodon", 10, img);
-
+                int op;
                 do {
                     // Serializar y enviar el catalogo
                     sendCatalogue(dos);
-                    // Recibir que producto pidio el cliente
-                    updateCatalogue(dis);
-                    op = dis.readUTF();
+                    op = dis.readInt();
+                    // reestablecer o reducir stock
+                    String opc = dis.readUTF();
+                    switch (opc) {
+                        case "b":
+                            // Recibir que producto pidio el cliente
+                            reduceStock(dis);
+                            break;
+                        case "r":
+                            restoreCatalogue(dis);
+                            break;
+                        case "u":
+                            updateCatalogue(dis);
+                            break;
+                        default:
+                            break;
+                    }
+                } while (op != 6);
 
-                } while (!op.equals("no"));
-
-                System.out.println("El cliente termino de realiar su compra");
+                System.out.println("El cliente termino de realizar su compra");
 
                 dos.close();
 
@@ -45,15 +64,28 @@ public class Servidor {
         } // catch
     }
 
-    // Funcion para agregar producto
-    public static void addProduct(String name, int price, String desc, int stock, byte[] img) {
-        catalogo.add(new Producto(name, price, desc, stock, img));
+    private static void deserializeFile(String nombre) {
+        try {
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(nombre));
+
+            // Deserializando el archivo
+            FileInputStream file = new FileInputStream(nombre);
+            ObjectInputStream ois = new ObjectInputStream(file);
+            System.out.println();
+            for (int i = 0; i < num_products_deserialize; i++) {
+                Producto aux = (Producto) ois.readObject();
+                catalogo.add(aux);
+            }
+            dos.close();
+            ois.close();
+        } catch (Exception e) {
+            // TODO: handle exception
+        }
     }
 
-    // Funcion para reducir el stock
-    public static void reduceStock(int pos) {
-        int stock = catalogo.get(pos).getStock();
-        catalogo.get(pos).setStock(stock - 1);
+    // Funcion para agregar producto
+    public static void addProduct(int id, String name, int price, String desc, int cant) {
+        catalogo.add(new Producto(id, name, price, desc, cant));
     }
 
     // funcion para borrar productos
@@ -71,7 +103,6 @@ public class Servidor {
             ObjectOutputStream oos = new ObjectOutputStream(fileS);
 
             // serializar los productos
-            System.out.println("\nSerializando...");
             for (int i = 0; i < catalogo.size(); i++) {
                 oos.writeObject(catalogo.get(i));
             }
@@ -82,6 +113,7 @@ public class Servidor {
 
             // numero de productos que va a recibir el cliente
             dos.writeInt(catalogo.size());
+            num_products_deserialize = catalogo.size();
             // nombre del archivo
             dos.writeUTF(file.getName());
             dos.flush();
@@ -99,9 +131,7 @@ public class Servidor {
                 dos.flush();
                 enviados = enviados + n;
                 porcentaje = (int) (enviados * 100 / tam);
-                System.out.print("Enviado: " + porcentaje + "%\r");
             }
-            System.out.print("\nArchivo enviado\n");
             System.out.println();
             dis.close();
         } catch (Exception e) {
@@ -109,18 +139,42 @@ public class Servidor {
         }
     }
 
-    public static void updateCatalogue(DataInputStream dis) throws IOException {
+    public static void reduceStock(DataInputStream dis) throws IOException {
         // Recibir el producto que el usuario quiere comprar
         int numProduct = dis.readInt() - 1;
+        int cantProducts = dis.readInt();
         // Comprobacion de exitencias
-        int exist = catalogo.get(numProduct).getStock();
+        int exist = catalogo.get(numProduct).getCant();
         if (exist >= 0) {
-            System.out.println("Producto en existencia");
+            System.out.println("Producto " + catalogo.get(numProduct).getName() + " en existencia");
             System.out.println("Se tienen: " + exist);
-            System.out.println("Reduciendo el stock de exitencias");
-            catalogo.get(numProduct).setStock(exist - 1);
-            int newStock = catalogo.get(numProduct).getStock();
+            catalogo.get(numProduct).setCant(exist - cantProducts);
+            int newStock = catalogo.get(numProduct).getCant();
             System.out.println("Quedan " + newStock + " productos");
         }
+    }
+
+    public static void restoreCatalogue(DataInputStream dis) throws IOException {
+        // Recibir el producto que el usuario ya no quiso
+        int product = dis.readInt();
+        // Recibir la cantidad de productos que eran
+        int numProducts = dis.readInt();
+        // Reestableciendo el stock
+        int stock = catalogo.get(product).getCant();
+        catalogo.get(product).setCant(stock + numProducts);
+        System.out.println("Se reestablecieron " + catalogo.get(product).getCant() + " los productos del articulo "
+                + catalogo.get(product).getName());
+    }
+
+    public static void updateCatalogue(DataInputStream dis) throws IOException {
+        // Recibir el producto que el usuario ya no quiso
+        int product = dis.readInt();
+        // Recibir la cantidad de productos a quitar
+        int numProducts = dis.readInt();
+        int stock = catalogo.get(product).getCant();
+        catalogo.get(product).setCant(stock - numProducts);
+        System.out
+                .println(
+                        "Se tienen " + catalogo.get(product).getCant() + " del producto " + catalogo.get(product).name);
     }
 }

@@ -26,8 +26,8 @@ public class Cliente {
             DataInputStream dis = new DataInputStream(cl.getInputStream());
 
             int opc;
-            String ok = "";
             do {
+                System.out.println("\tBienvenido a la tienda de playeras");
                 // Recibir el archivo serializado
                 // recibir la cantidad de productos
                 numProducts = dis.readInt();
@@ -41,64 +41,93 @@ public class Cliente {
                 System.out.println("¿Que deseas realizar?");
                 System.out.println("1. Comprar productos");
                 System.out.println("2. Checar el carrito de compras");
-                System.out.println("3. Eliminar productos del carrito");
-                System.out.println("4. Cancelar todo el carrito");
+                System.out.println("3. Eliminar un producto del carrito");
+                System.out.println("4. Agregar mas productos de lo que ya tienes en el carrito");
                 System.out.println("5. Comprar lo que hay en el carrito");
                 System.out.println("6. Salir");
+                System.out.printf("Opcion: ");
                 opc = Integer.parseInt(br.readLine());
+                dos.writeInt(opc);
 
                 switch (opc) {
                     case 1:
                         // Enviando el producto que se esta comprando
-                        buying(br, dos, dis);
+                        dos.writeUTF("b");
+                        buying(br, dos);
                         break;
                     case 2:
                         // Checando productos del carrito
                         // Si el carrito esta vacio devolver que no hay productos
+                        dos.writeUTF("nada");
                         if (carrito.isEmpty()) {
                             System.out.println("El carrito esta vacio");
-                            ok = "no";
                         } else {
+                            System.out.println("Productos del carrito");
                             printCarrito();
                         }
+                        System.out.println("Press Any Key To Continue...");
+                        new java.util.Scanner(System.in).nextLine();
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
                         break;
                     case 3:
                         // Borrar productos del carrito
                         if (carrito.isEmpty()) {
+                            dos.writeUTF("nada");
                             System.out.println("El carrito esta vacio");
-                            ok = "no";
                         } else {
-                            System.out.println("¿Que produto quieres borrar del carrito");
+                            dos.writeUTF("r");
+                            System.out.println("¿Que producto quieres borrar del carrito?");
+                            System.out.println("Productos del carrito");
+                            printCarrito();
                             System.out.printf("Ingresa el numero del producto: ");
                             int numProduct = Integer.parseInt(br.readLine());
-                            catalogo.remove(numProduct);
+                            deleteProduct(numProduct, dos, br);
                             System.out.println("Carrito actualizado:");
                             printCarrito();
                         }
+                        System.out.println("Press Any Key To Continue...");
+                        new java.util.Scanner(System.in).nextLine();
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
                         break;
                     case 4:
                         if (carrito.isEmpty()) {
+                            dos.writeUTF("nada");
                             System.out.println("El carrito esta vacio");
-                            ok = "no";
                         } else {
-                            for (int i = 0; i < carrito.size(); i++) {
-                                carrito.remove(i);
-                            }
-                            System.out.println("El carrito esta vacio");
+                            dos.writeUTF("u");
+                            System.out.println("En tu carrito tienes: ");
+                            printCarrito();
+                            System.out.printf("¿De que producto quiere mas articulos?: ");
+                            int numProduct = Integer.parseInt(br.readLine());
+                            modifyCarrito(numProduct, br, dos);
                         }
+                        System.out.println("Press Any Key To Continue...");
+                        new java.util.Scanner(System.in).nextLine();
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
                         break;
                     case 5:
+                        dos.writeUTF("nada");
                         if (carrito.isEmpty()) {
                             System.out.println("El carrito esta vacio");
-                            ok = "no";
                         } else {
                             // Generar el archivo pdf con los articulos del carrito
                         }
+                        System.out.println("Press Any Key To Continue...");
+                        new java.util.Scanner(System.in).nextLine();
+                        System.out.print("\033[H\033[2J");
+                        System.out.flush();
+                        break;
+                    case 6:
+                        System.out.println("Vuelva pronto!!");
+                        dos.writeInt(opc);
                         break;
                     default:
-                        System.out.println("Opcion no valida");
+                        System.out.println("Opcion incorrecta");
+                        break;
                 }
-                dos.writeUTF(ok);
             } while (opc != 6);
 
             dis.close();
@@ -123,20 +152,18 @@ public class Cliente {
                 recibidos = recibidos + n;
                 porcentaje = (int) (recibidos * 100 / tam);
             }
-            System.out.print("\nCatalogo\n");
-
+            System.out.print("\nNuestro catalogo es\n");
             // Deserializando el archivo
             FileInputStream file = new FileInputStream(nombre);
             ObjectInputStream ois = new ObjectInputStream(file);
             System.out.println();
-            System.out.println("El catalogo es: ");
             for (int i = 0; i < numProducts; i++) {
                 Producto aux = (Producto) ois.readObject();
-                System.out.println("Num Producto: " + (i + 1));
+                System.out.println("Num Producto: " + aux.id);
                 System.out.println("Nombre: " + aux.name);
                 System.out.println("Precio: $" + aux.price);
                 System.out.println("Descripcion: " + aux.desc);
-                System.out.println("Stock: " + aux.stock);
+                System.out.println("Stock: " + aux.cant);
                 System.out.println();
                 catalogo.add(aux);
             }
@@ -149,15 +176,31 @@ public class Cliente {
     }
 
     // Comprando un producto
-    public static void buying(BufferedReader br, DataOutputStream dos, DataInputStream dis) {
+    public static void buying(BufferedReader br, DataOutputStream dos) {
         try {
             System.out.println("¿Que producto desea comprar?");
-            System.out.print("Ingresa el numero del producto: ");
+            System.out.printf("Ingresa el numero del producto: ");
             int num = Integer.parseInt(br.readLine());
+            System.out.printf("¿Cuantos productos vas a comprar?: ");
+            int numProducts = Integer.parseInt(br.readLine());
             System.out.println("Se estan comprobando existencias de su producto, por favor espere");
-            dos.writeInt(num);
-            carrito.add(catalogo.get(num - 1));
-            System.out.println("Producto agregado al carrito");
+            if (numProducts > catalogo.get(num - 1).getCant()) {
+                System.out.println("No puedes comprar esta cantidad de productos.");
+                dos.writeInt(num);
+                dos.writeInt(0);
+            } else {
+                dos.writeInt(num);
+                dos.writeInt(numProducts);
+                carrito.add(catalogo.get(num - 1));
+                for (int i = 0; i < carrito.size(); i++) {
+                    System.out.println("id " + carrito.get(i).getId());
+                    if (carrito.get(i).getId() == num) {
+                        carrito.get(i).setCant(numProducts);
+                        int aux = carrito.get(i).getCant();
+                        System.out.println("Se agregaron " + aux + " productos al carrito");
+                    }
+                }
+            }
         } catch (Exception e) {
             // TODO: handle exception
         }
@@ -166,13 +209,68 @@ public class Cliente {
     // Imprimir el catalogo
     public static void printCarrito() {
         for (int i = 0; i < carrito.size(); i++) {
-            System.out.println("Productos del carrito");
-            System.out.println("Num Producto: " + (i + 1));
-            System.out.println("Nombre: " + carrito.get(i).name);
-            System.out.println("Precio: $" + carrito.get(i).price);
-            System.out.println("Descripcion: " + carrito.get(i).desc);
-            System.out.println("Stock: " + carrito.get(i).stock);
+            System.out.println("Num Producto: " + carrito.get(i).getId());
+            System.out.println("Nombre: " + carrito.get(i).getName());
+            System.out.println("Precio: $" + carrito.get(i).getPrice());
+            System.out.println("Descripcion: " + carrito.get(i).getDesc());
+            System.out.println("Cantidad: " + carrito.get(i).getCant());
             System.out.println();
+        }
+    }
+
+    public static void modifyCarrito(int numProduct, BufferedReader br, DataOutputStream dos) throws IOException {
+        for (int i = 0; i < carrito.size(); i++) {
+            if (carrito.get(i).getId() == numProduct) {
+                System.out.println("Se tienen " + catalogo.get(numProduct - 1).getCant() + " productos de "
+                        + catalogo.get(numProduct - 1).getName());
+                System.out.printf("¿Cuantos productos vas a agregar?: ");
+                int cant = Integer.parseInt(br.readLine());
+                if (cant > catalogo.get(numProduct - 1).getCant()) {
+                    System.out.println("No puedes agregar mas productos de lo que hay en stock");
+                    dos.writeInt(numProduct - 1);
+                    dos.writeInt(0);
+                } else {
+                    dos.writeInt(numProduct - 1);
+                    dos.writeInt(cant);
+                    int aux = carrito.get(i).getCant();
+                    carrito.get(i).setCant(aux + cant);
+                    System.out.println("Se agregaron " + cant + " del producto " + carrito.get(i).getName());
+                }
+            }
+
+        }
+    }
+
+    public static void deleteProduct(int numProduct, DataOutputStream dos, BufferedReader br) throws IOException {
+        for (int i = 0; i < carrito.size(); i++) {
+            if (carrito.get(i).getId() == numProduct) {
+                // Enviar el numero de producto a quitar
+                dos.writeInt(numProduct - 1);
+                if (carrito.get(i).getCant() > 1) {
+                    System.out.printf("Ingresa la cantidad de productos a cancelar: ");
+                    int cant = Integer.parseInt(br.readLine());
+                    if (cant > carrito.get(i).getCant()) {
+                        System.out.println("No puedes eliminar esta cantidad de productos.");
+                        dos.writeInt(0);
+                    } else if (cant == carrito.get(i).getCant()) {
+                        // Enviar la cantidad de productos que eran
+                        dos.writeInt(cant);
+                        // Se elimina el producto del carrito
+                        carrito.remove(i);
+                    } else if (cant < carrito.get(i).getCant()) {
+                        // Enviar la cantidad de productos que eran
+                        dos.writeInt(cant);
+                        // obtener cantidad que tiene
+                        int aux = carrito.get(i).getCant();
+                        carrito.get(i).setCant(aux - cant);
+                    }
+                } else {
+                    // Enviar la cantidad de productos que eran
+                    dos.writeInt(1);
+                    // Se elimina el producto del carrito
+                    carrito.remove(i);
+                }
+            }
         }
     }
 }
