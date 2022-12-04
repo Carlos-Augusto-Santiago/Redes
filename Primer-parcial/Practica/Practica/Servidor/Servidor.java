@@ -31,12 +31,12 @@ public class Servidor {
                     addProduct(6, "Playera rosa", 200, "Playera de tela 100% algodon", 10);
                 }
 
-                sendFiles("amarilla.jpeg", dos);
-                sendFiles("azul.jpeg",dos);
-                sendFiles("magenta.jpeg", dos);
-                sendFiles("roja.jpeg",dos);
-                sendFiles("rosa.jpeg", dos);
-                sendFiles("verde.jpeg",dos);
+                sendFiles("./amarilla.jpeg", dos);
+                sendFiles("./azul.jpeg", dos);
+                sendFiles("./magenta.jpeg", dos);
+                sendFiles("./roja.jpeg", dos);
+                sendFiles("./rosa.jpeg", dos);
+                sendFiles("./verde.jpeg", dos);
 
                 int op;
                 do {
@@ -74,6 +74,12 @@ public class Servidor {
             System.out.println();
             for (int i = 0; i < num_products_deserialize; i++) {
                 Producto aux = (Producto) ois.readObject();
+                System.out.println("Num Producto: " + aux.id);
+                System.out.println("Nombre: " + aux.name);
+                System.out.println("Precio: $" + aux.price);
+                System.out.println("Descripcion: " + aux.desc);
+                System.out.println("Stock: " + aux.cant);
+                System.out.println();
                 catalogo.add(aux);
             }
             dos.close();
@@ -139,9 +145,8 @@ public class Servidor {
         }
     }
 
-
     public static void updateCatalogue(DataInputStream dis) throws IOException {
-        // Recibir el producto que el usuario compro    
+        // Recibir el producto que el usuario compro
         int product = dis.readInt();
         // Recibir la cantidad de productos a quitar
         int numProducts = dis.readInt();
